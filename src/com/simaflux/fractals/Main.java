@@ -36,6 +36,7 @@ public class Main extends JPanel implements Runnable, KeyListener, MouseListener
 	private int FPS = 30;
 
 	public static void main(String[] args) {
+
 		JFrame window = new JFrame("Game Engine");
 		window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		window.setContentPane(new Main());
@@ -43,6 +44,7 @@ public class Main extends JPanel implements Runnable, KeyListener, MouseListener
 
 		window.pack();
 		window.setVisible(true);
+
 	}
 
 	public Main() {
@@ -58,7 +60,7 @@ public class Main extends JPanel implements Runnable, KeyListener, MouseListener
 		zoom = 20.0f;
 		s = 10;
 		p = 2;
-		nmax = 100;
+		nmax = 500;
 		edit = 0;
 		newNum = 0;
 		ui = true;
@@ -72,34 +74,52 @@ public class Main extends JPanel implements Runnable, KeyListener, MouseListener
 		
 		for(int a = 0; a < WIDTH; a++) {
 			for(int b = 0; b < HEIGHT; b++) {
-				Complex c = new Complex(
-						(a - WIDTH / 2 - x / 100.0f) / zoom / zoom + x / 100.0f, 
-						(b - HEIGHT / 2 - y / 100.0f) / zoom / zoom + y / 100.0f);
-				Complex z = new Complex(0, 0);
-				int n = 0;
 				
-				while(z.length() < s && n < nmax) {
-					z = z.power(p).add(c);
-					n++;
-				}
-				f.setColor(new Color((int) (255.0 * n / nmax)));
+				float n = getN(a, b);
+				//f.setColor(new Color((int) (255.0 * n / nmax), 255, n < nmax ? 255 : 0));
+				
+				double rotations = 10.0;
+				int R = (int) (Math.sin(rotations * 2.0 * Math.PI * n + Math.PI) * 125 + 125);
+				int G = (int) (Math.cos(rotations * 2.0 * Math.PI * n) * 125 + 125);
+				int B = (int) (int) (255.0 * n);
+				
+				f.setColor(new Color(R, G, B));
 				f.fillRect(a, b, 1, 1);
 			}
 		}
+		
 	}
 
+	public float getN(int a, int b) {
+		Complex c = new Complex(
+				(a - WIDTH / 2 - x / 100.0f) / zoom / zoom + x / 100.0f, 
+				(b - HEIGHT / 2 - y / 100.0f) / zoom / zoom + y / 100.0f);
+		Complex z = new Complex(0, 0);
+		int n = 0;
+		
+		while(z.length() < s && n < nmax) {
+			z = z.power(p).add(c);
+			n++;
+		}
+		
+		if(n == nmax) return 1.0f;
+		
+		float d = (float) (1.0f * (n + 1.0 / z.length()) / nmax);
+		return d;
+	}
+	
 	public void addNotify() {
 		super.addNotify();
 		if (thread == null) {
 			thread = new Thread(this);
 			thread.start();
 		}
-		
 		addKeyListener(this);
 		addMouseListener(this);
 	}
 
 	public void run() {
+
 		running = true;
 
 		image = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
@@ -128,7 +148,9 @@ public class Main extends JPanel implements Runnable, KeyListener, MouseListener
 			try {
 				Thread.sleep(waitTime);
 			} catch (Exception e) {}
+
 		}
+
 	}
 
 	private void gameUpdate() {
@@ -139,11 +161,12 @@ public class Main extends JPanel implements Runnable, KeyListener, MouseListener
 	}
 
 	private void gameRender() {
+		
 		g.drawImage(fractal, 0, 0, WIDTH, HEIGHT, null);
 		
 		if(ui) {
 			if(edit > 0) {
-				g.setColor(Color.GRAY);
+				g.setColor(new Color(100, 100, 100, 200));
 				g.fillRect(10, (edit - 1) * 40 + 10, 280, 40);
 			}
 			g.setColor(Color.WHITE);
@@ -160,6 +183,7 @@ public class Main extends JPanel implements Runnable, KeyListener, MouseListener
 		if(ee) {
 			g.drawString("Made by Simon Brun Olsen", 1520, 1060);
 		}
+		
 	}
 
 	private void gameDraw() {
@@ -194,29 +218,43 @@ public class Main extends JPanel implements Runnable, KeyListener, MouseListener
 		
 		if(kc == 10 && edit > 0 && newNum != 0) {
 			if(edit == 1) x = newNum;
-			if(edit == 2) y = newNum;
+			if(edit == 2) y = -newNum;
 			if(edit == 3) zoom = newNum;
 			if(edit == 4) p = newNum;
 			newNum = 0;
 		}
 		
 		if(edit > 4) edit = 0;
+		
 	}
 
 	@Override
-	public void keyReleased(KeyEvent e) {}
+	public void keyReleased(KeyEvent e) {
+	}
+
 	@Override
-	public void keyTyped(KeyEvent e) {}
+	public void keyTyped(KeyEvent e) {
+	}
+
 	@Override
-	public void mouseClicked(MouseEvent e) {}
+	public void mouseClicked(MouseEvent e) {
+	}
+
 	@Override
-	public void mouseEntered(MouseEvent e) {}
+	public void mouseEntered(MouseEvent e) {
+	}
+
 	@Override
-	public void mouseExited(MouseEvent e) {}
+	public void mouseExited(MouseEvent e) {
+	}
+
 	@Override
-	public void mousePressed(MouseEvent e) {}
+
+	public void mousePressed(MouseEvent e) {
+	}
+
 	@Override
-	public void mouseReleased(MouseEvent e) {}
+	public void mouseReleased(MouseEvent e) {
+	}
 
 }
-
