@@ -1,5 +1,6 @@
 package com.simaflux.fractals;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -26,9 +27,9 @@ public class Main extends JPanel implements Runnable, KeyListener, MouseListener
 	private Thread thread;
 	private boolean running;
 
-	private int x, y, s, p, nmax, edit, newNum;
+	private int x, y, s, p, c, nmax, edit, newNum;
 	private float zoom;
-	private boolean ui, create, ee;
+	private boolean ui, create, ee, bnw;
 	
 	private BufferedImage image, fractal;
 	private Graphics2D g;
@@ -58,7 +59,7 @@ public class Main extends JPanel implements Runnable, KeyListener, MouseListener
 		x = 0;
 		y = 0;
 		zoom = 20.0f;
-		s = 10;
+		s = 3;
 		p = 2;
 		nmax = 500;
 		edit = 0;
@@ -66,6 +67,8 @@ public class Main extends JPanel implements Runnable, KeyListener, MouseListener
 		ui = true;
 		create = true;
 		ee = false;
+		c = 1;
+		bnw = false;
 	}
 	
 	private void createSet() {
@@ -78,22 +81,43 @@ public class Main extends JPanel implements Runnable, KeyListener, MouseListener
 				float n = getN(a, b);
 				//f.setColor(new Color((int) (255.0 * n / nmax), 255, n < nmax ? 255 : 0));
 				
-				double rotations = 10.0;
-				int R = (int) (Math.sin(rotations * 2.0 * Math.PI * n + Math.PI) * 125 + 125);
-				int G = (int) (Math.cos(rotations * 2.0 * Math.PI * n) * 125 + 125);
-				int B = (int) (int) (255.0 * n);
-				
-				f.setColor(new Color(R, G, B));
+				if(bnw) {
+					int c = (int) (255.0 - 200.0 * n);
+					
+					f.setColor(new Color(c, c, c));
+				} else {
+					double rotations = 5.0;
+					double startingPoint = Math.PI * c / 100;
+					int R = (int) (Math.sin(rotations * 2.0 * Math.PI * n + startingPoint) * 125 + 125);
+					int G = (int) (Math.cos(rotations * 2.0 * Math.PI * n + startingPoint) * 125 + 125);
+					int B = (int) (255.0 * n);
+					
+					f.setColor(new Color(R, G, B));
+				}
 				f.fillRect(a, b, 1, 1);
 			}
 		}
 		
 	}
 
+	public float atZoomX(int v) {
+		return (v - WIDTH / 2 - x / 100.0f) / zoom / zoom + x / 100.0f;
+	}
+	
+	public float atZoomY(int v) {
+		return (v - HEIGHT / 2 - y / 100.0f) / zoom / zoom + y / 100.0f;
+	}
+	
+	public int getScreenPosX(float m) {
+		return (int) ((m - x / 100.0f) * zoom * zoom + x / 100.0f + WIDTH / 2);
+	}
+	
+	public int getScreenPosY(float m) {
+		return (int) ((m - y / 100.0f) * zoom * zoom + y / 100.0f + HEIGHT / 2);
+	}
+	
 	public float getN(int a, int b) {
-		Complex c = new Complex(
-				(a - WIDTH / 2 - x / 100.0f) / zoom / zoom + x / 100.0f, 
-				(b - HEIGHT / 2 - y / 100.0f) / zoom / zoom + y / 100.0f);
+		Complex c = new Complex(atZoomX(a), atZoomY(b));
 		Complex z = new Complex(0, 0);
 		int n = 0;
 		
@@ -165,19 +189,44 @@ public class Main extends JPanel implements Runnable, KeyListener, MouseListener
 		g.drawImage(fractal, 0, 0, WIDTH, HEIGHT, null);
 		
 		if(ui) {
+			
+			g.setStroke(new BasicStroke(3));
+			g.setFont(new Font("Console", Font.BOLD, 20));
+			
+			for(float q = - 2.0f; q < 2.01f; q += 0.5) {
+				int a = getScreenPosX(q);
+				g.setColor(q != 0 ? new Color(0, 0, 0, 100) : Color.BLACK);
+				g.drawLine(a, 0, a, HEIGHT);
+				g.drawString(Float.toString(q).substring(0, q < 0 ? 4 : 3), a + 15, HEIGHT / 2 - 15);
+			}
+			
+			for(float q = - 2.0f; q < 2.01f; q += 0.5) {
+				int a = getScreenPosY(q);
+				g.setColor(q != 0 ? new Color(0, 0, 0, 100) : Color.BLACK);
+				g.drawLine(0, a, WIDTH, a);
+				if(q != 0) g.drawString(Float.toString(q).substring(0, q < 0 ? 4 : 3) + "i", WIDTH / 2 + 15, a - 15);
+			}
+			
+			g.setColor(new Color(255, 0, 0, 200));
+			int xpos = getScreenPosX(-2.0f), ypos = getScreenPosY(-2.0f), size = getScreenPosX(2.0f) - xpos;
+			g.drawOval(xpos, ypos, size, size);
+			
 			if(edit > 0) {
 				g.setColor(new Color(100, 100, 100, 200));
 				g.fillRect(10, (edit - 1) * 40 + 10, 280, 40);
 			}
-			g.setColor(Color.WHITE);
-			g.setFont(new Font("Console", Font.BOLD, 30));
+			
+			g.setColor(Color.BLACK);
 			g.drawString("X = " + ((edit == 1 && newNum != 0) ? newNum : x), 20, 40);
 			g.drawString("Y = " + ((edit == 2 && newNum != 0) ? newNum : (-y)), 20, 80);
 			g.drawString("Z = " + ((edit == 3 && newNum != 0) ? newNum :zoom), 20, 120);
 			g.drawString("P = " + ((edit == 4 && newNum != 0) ? newNum : p), 20, 160);
-			g.drawString("F1 to toggle UI", 20, 200);
-			g.drawString("F2 to edit settings", 20, 240);
-			g.drawString("F3 to render", 20, 280);
+			g.drawString("C = " + ((edit == 5 && newNum != 0) ? newNum : c), 20, 200);
+			g.drawString("F1 to toggle UI", 20, 240);
+			g.drawString("F2 to edit settings", 20, 280);
+			g.drawString("F3 to render", 20, 320);
+			if(!bnw) g.setColor(Color.BLUE);
+			g.drawString("F4 to remove Colors", 20, 360);
 		}
 		
 		if(ee) {
@@ -195,7 +244,6 @@ public class Main extends JPanel implements Runnable, KeyListener, MouseListener
 	@Override
 	public void keyPressed(KeyEvent e) {
 		int kc = e.getKeyCode();
-		
 		if (kc == 27)	System.exit(0);
 		
 		if(kc == 112) {
@@ -209,7 +257,7 @@ public class Main extends JPanel implements Runnable, KeyListener, MouseListener
 		}
 		
 		create = (kc == 114);
-		
+		if(kc == 115) bnw = !bnw;
 		if(kc == 118) ee = !ee;
 		
 		if(edit > 0 && kc >= 48 && kc <= 57) newNum = newNum * 10 + kc - 48;
@@ -221,10 +269,11 @@ public class Main extends JPanel implements Runnable, KeyListener, MouseListener
 			if(edit == 2) y = -newNum;
 			if(edit == 3) zoom = newNum;
 			if(edit == 4) p = newNum;
+			if(edit == 5) c = newNum;
 			newNum = 0;
 		}
 		
-		if(edit > 4) edit = 0;
+		if(edit > 5) edit = 0;
 		
 	}
 
