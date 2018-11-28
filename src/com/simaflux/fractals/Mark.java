@@ -21,8 +21,8 @@ public class Mark {
 	}
 	
 	public void draw(Graphics2D g) {
-		g.setColor(Color.BLACK);
-		g.fillOval(x - 5, y - 5, 10, 10);
+		g.setColor(Color.WHITE);
+		g.fillOval(x - 3, y - 3, 6, 6);
 	}
 	
 }

@@ -292,14 +292,12 @@ public class Main extends JPanel implements Runnable, KeyListener, MouseListener
 			
 			if(trace) {
 				for(int i = 0; i < list.size(); i++) {
-					list.get(i).draw(g);
-					
 					if(i + 1 < list.size()) {
 						g.setStroke(new BasicStroke(3));
 						g.setColor(Color.RED);
 						g.drawLine(list.get(i).getX(), list.get(i).getY(), list.get(i + 1).getX(), list.get(i + 1).getY());
 					}
-					
+					list.get(i).draw(g);
 				}
 			}
 			
