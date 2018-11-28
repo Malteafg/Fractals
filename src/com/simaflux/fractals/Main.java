@@ -31,7 +31,7 @@ public class Main extends JPanel implements Runnable, KeyListener, MouseListener
 
 	private ArrayList<Mark> list;
 	
-	private int x, y, s, p, c, nmax, edit, newNum;
+	private int x, y, s, p, c, nmax, edit, newNum, mode;
 	private float zoom;
 	private boolean ui, create, ee, bnw, trace, gradient;
 	
@@ -74,7 +74,53 @@ public class Main extends JPanel implements Runnable, KeyListener, MouseListener
 		c = 100;
 		bnw = false;
 		trace = true;
+		mode = 0;
 		list = new ArrayList<>();
+	}
+	
+	private void circleImage() {
+		fractal = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
+		Graphics2D f = (Graphics2D) fractal.getGraphics();
+		f.setColor(Color.WHITE);
+		f.fillRect(0, 0, WIDTH, HEIGHT);
+		
+		for(int a = 0; a < WIDTH; a++) {
+			for(int b = 0; b < HEIGHT; b++) {
+				if(Math.sqrt(Math.pow(atZoomX(a) + 1, 2) + Math.pow(atZoomY(b) * 1.0, 2)) < 0.25) {
+					Complex c = new Complex(atZoomX(a), atZoomY(b));
+					Complex z = new Complex(0, 0);
+					
+					for(int i = 0; i < nmax; i++) {
+						z = z.power(p).add(c);
+					}
+					
+					f.setColor(Color.BLUE);
+					f.fillRect(getScreenPosX(z.X()), getScreenPosY(z.Y()), 1, 1);
+				}
+			}
+		}
+	}
+	
+	private void squareImage() {
+		fractal = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
+		Graphics2D f = (Graphics2D) fractal.getGraphics();
+		f.setColor(Color.WHITE);
+		f.fillRect(0, 0, WIDTH, HEIGHT);
+		
+		for(int a = 0; a < WIDTH; a++) {
+			for(int b = 0; b < HEIGHT; b++) {
+				Complex c = new Complex(atZoomX(a), atZoomY(b));
+				Complex z = new Complex(0, 0);
+				
+				for(int i = 0; i < nmax; i++) {
+					z = z.power(p).add(c);
+				}
+				
+				if((int) (a / 30) % 2 == (int) (b / 30) % 2) f.setColor(Color.BLACK);
+				else f.setColor(Color.RED);
+				f.fillRect(getScreenPosX(z.X()), getScreenPosY(z.Y()), 1, 1);
+			}
+		}
 	}
 	
 	private void createSet() {
@@ -172,7 +218,7 @@ public class Main extends JPanel implements Runnable, KeyListener, MouseListener
 
 		image = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
 		g = (Graphics2D) image.getGraphics();
-		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);	
 		g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
 		init();
@@ -203,7 +249,18 @@ public class Main extends JPanel implements Runnable, KeyListener, MouseListener
 
 	private void gameUpdate() {
 		if(create) {
-			createSet();
+			switch(mode) {
+			
+			case 1:
+				squareImage();
+				break;
+			case 2:
+				circleImage();
+				break;
+			default:
+				createSet();
+				break;
+			}
 			create = false;
 		}
 	}
@@ -270,6 +327,25 @@ public class Main extends JPanel implements Runnable, KeyListener, MouseListener
 			g.setColor(Color.BLACK);
 			g.drawString("T to remove trace", 20, 440);
 			g.drawString("G to remove gradient", 20, 480);
+			g.drawString("Y to change mode", 20, 520);
+			
+			String s;
+			
+			switch(mode) {
+			
+			case 1:
+				s = "Square Trace";
+				break;
+			case 2:
+				s = "Circle Trace";
+				break;
+			default:
+				s = "Mandelbrot Set";
+				break;
+			}
+			
+			g.drawString("Mode: " + s, 20, 560);
+			
 		}
 		
 		if(ee) {
@@ -289,6 +365,12 @@ public class Main extends JPanel implements Runnable, KeyListener, MouseListener
 		int kc = e.getKeyCode();
 		if (kc == 27)	System.exit(0);
 		
+		if(e.getKeyChar() == 'y') {
+			mode++;
+			if(mode > 2) mode = 0;
+			if(mode > 0) nmax = 1;
+			else nmax = 500;
+		}
 		if(e.getKeyChar() == 't') trace = !trace;
 		if(e.getKeyChar() == 'g') gradient = !gradient;
 		
@@ -362,7 +444,6 @@ public class Main extends JPanel implements Runnable, KeyListener, MouseListener
 
 	@Override
 	public void mouseDragged(MouseEvent e) {
-		// TODO Auto-generated method stub
 		
 	}
 
