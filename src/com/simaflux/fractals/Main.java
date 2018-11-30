@@ -268,43 +268,42 @@ public class Main extends JPanel implements Runnable, KeyListener, MouseListener
 	private void gameRender() {
 		
 		g.drawImage(fractal, 0, 0, WIDTH, HEIGHT, null);
+					
+		g.setStroke(new BasicStroke(3));
+		g.setFont(new Font("Console", Font.BOLD, 20));
+		
+		int b = getScreenPosY(0);
+		for(float q = - 2.0f; q < 2.01f; q += 0.5) {
+			int a = getScreenPosX(q);
+			g.setColor(q != 0 ? new Color(200, 0, 0, 100) : Color.RED);
+			g.drawLine(a, 0, a, HEIGHT);
+			g.drawString(Float.toString(q).substring(0, q < 0 ? 4 : 3), a + 15, b - 15);
+		}
+		
+		b = getScreenPosX(0);
+		for(float q = - 2.0f; q < 2.01f; q += 0.5) {
+			int a = getScreenPosY(q);
+			g.setColor(q != 0 ? new Color(200, 0, 0, 100) : Color.RED);
+			g.drawLine(0, a, WIDTH, a);
+			if(q != 0) g.drawString(Float.toString(-q).substring(0, (-q) < 0 ? 4 : 3) + "i", b + 15, a - 15);
+		}
+		
+		if(trace) {
+			for(int i = 0; i < list.size(); i++) {
+				if(i + 1 < list.size()) {
+					g.setStroke(new BasicStroke(3));
+					g.setColor(Color.CYAN);
+					g.drawLine(list.get(i).getX(), list.get(i).getY(), list.get(i + 1).getX(), list.get(i + 1).getY());
+				}
+				list.get(i).draw(g);
+			}
+		}
+		
+		g.setColor(new Color(255, 0, 0, 200));
+		int xpos = getScreenPosX(-2.0f), ypos = getScreenPosY(-2.0f), size = getScreenPosX(2.0f) - xpos;
+		g.drawOval(xpos, ypos, size, size);
 		
 		if(ui) {
-			
-			g.setStroke(new BasicStroke(3));
-			g.setFont(new Font("Console", Font.BOLD, 20));
-			
-			int b = getScreenPosY(0);
-			for(float q = - 2.0f; q < 2.01f; q += 0.5) {
-				int a = getScreenPosX(q);
-				g.setColor(q != 0 ? new Color(200, 0, 0, 100) : Color.RED);
-				g.drawLine(a, 0, a, HEIGHT);
-				g.drawString(Float.toString(q).substring(0, q < 0 ? 4 : 3), a + 15, b - 15);
-			}
-			
-			b = getScreenPosX(0);
-			for(float q = - 2.0f; q < 2.01f; q += 0.5) {
-				int a = getScreenPosY(q);
-				g.setColor(q != 0 ? new Color(200, 0, 0, 100) : Color.RED);
-				g.drawLine(0, a, WIDTH, a);
-				if(q != 0) g.drawString(Float.toString(-q).substring(0, (-q) < 0 ? 4 : 3) + "i", b + 15, a - 15);
-			}
-			
-			if(trace) {
-				for(int i = 0; i < list.size(); i++) {
-					if(i + 1 < list.size()) {
-						g.setStroke(new BasicStroke(3));
-						g.setColor(Color.RED);
-						g.drawLine(list.get(i).getX(), list.get(i).getY(), list.get(i + 1).getX(), list.get(i + 1).getY());
-					}
-					list.get(i).draw(g);
-				}
-			}
-			
-			g.setColor(new Color(255, 0, 0, 200));
-			int xpos = getScreenPosX(-2.0f), ypos = getScreenPosY(-2.0f), size = getScreenPosX(2.0f) - xpos;
-			g.drawOval(xpos, ypos, size, size);
-			
 			if(edit > 0) {
 				g.setColor(new Color(100, 100, 100, 200));
 				g.fillRect(10, (edit - 1) * 40 + 10, 280, 40);
