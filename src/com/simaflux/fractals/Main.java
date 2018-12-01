@@ -63,7 +63,7 @@ public class Main extends JPanel implements Runnable, KeyListener, MouseListener
 		x = 0;
 		y = 0;
 		zoom = 20.0f;
-		s = 3;
+		s = 2;
 		p = 2;
 		nmax = 500;
 		edit = 0;
@@ -123,6 +123,21 @@ public class Main extends JPanel implements Runnable, KeyListener, MouseListener
 		}
 	}
 	
+	private void createTwoColorSet() {
+		fractal = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
+		Graphics2D f = (Graphics2D) fractal.getGraphics();
+		
+		for(int a = 0; a < WIDTH; a++) {
+			for(int b = 0; b < HEIGHT; b++) {
+				
+				if(getN(a, b) == 1.0f) f.setColor(Color.BLACK);
+				else f.setColor(Color.WHITE);
+				
+				f.fillRect(a, b, 1, 1);
+			}
+		}
+	}
+	
 	private void createSet() {
 		fractal = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
 		Graphics2D f = (Graphics2D) fractal.getGraphics();
@@ -153,7 +168,6 @@ public class Main extends JPanel implements Runnable, KeyListener, MouseListener
 				f.fillRect(a, b, 1, 1);
 			}
 		}
-		
 	}
 
 	public float atZoomX(int v) {
@@ -257,6 +271,9 @@ public class Main extends JPanel implements Runnable, KeyListener, MouseListener
 			case 2:
 				circleImage();
 				break;
+			case 3:
+				createTwoColorSet();
+				break;
 			default:
 				createSet();
 				break;
@@ -336,6 +353,9 @@ public class Main extends JPanel implements Runnable, KeyListener, MouseListener
 			case 2:
 				s = "Circle Trace";
 				break;
+			case 3:
+				s = "Two Color Set";
+				break;
 			default:
 				s = "Mandelbrot Set";
 				break;
@@ -364,7 +384,7 @@ public class Main extends JPanel implements Runnable, KeyListener, MouseListener
 		
 		if(e.getKeyChar() == 'y') {
 			mode++;
-			if(mode > 2) mode = 0;
+			if(mode > 3) mode = 0;
 			if(mode > 0) nmax = 1;
 			else nmax = 500;
 		}
